@@ -48,7 +48,7 @@ struct ContentView: View {
     
     @State var value = "0"
     @State var equation = ""
-    @State var runningNumber = 0
+    @State var runningNumber: Double = 0.0
     @State var currentOperation: Operation = .none
     @State var equalPressed = false
     
@@ -112,33 +112,41 @@ struct ContentView: View {
         case .add, .subtract, .multiply, .divide, .equal:
             if button == .add {
                 self.currentOperation = .add
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0.0
                 self.equation.append(" + ")
             }
             else if button == .subtract {
                 self.currentOperation = .subtract
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0.0
                 self.equation.append(" - ")
             }
             else if button == .multiply {
                 self.currentOperation = .multiply
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0.0
                 self.equation.append(" × ")
             }
             else if button == .divide {
                 self.currentOperation = .divide
-                self.runningNumber = Int(self.value) ?? 0
+                self.runningNumber = Double(self.value) ?? 0.0
                 self.equation.append(" ÷ ")
             }
             else if button == .equal {
                 equalPressed = true
                 let runningValue = self.runningNumber
-                let currentValue = Int(self.value) ?? 0
+                let currentValue = Double(self.value) ?? 0.0
                 switch self.currentOperation {
-                case .add: self.value = "\(runningValue + currentValue)"
-                case .subtract: self.value = "\(runningValue - currentValue)"
-                case .multiply: self.value = "\(runningValue * currentValue)"
-                case .divide: self.value = "\(runningValue / currentValue)"
+                case .add:
+                    let answer: Double = runningValue + currentValue
+                    self.value = self.removeDecimal(number: answer)
+                case .subtract:
+                    let answer: Double = runningValue - currentValue
+                    self.value = self.removeDecimal(number: answer)
+                case .multiply:
+                    let answer: Double = runningValue * currentValue
+                    self.value = self.removeDecimal(number: answer)
+                case .divide:
+                    let answer: Double = runningValue / currentValue
+                    self.value = self.removeDecimal(number: answer)
                 case .none:
                     break
                 }
@@ -153,7 +161,16 @@ struct ContentView: View {
             self.currentOperation = .none
             self.equation = ""
         case .decimal, .negative, .percent:
-            break
+            if button == .decimal {
+                
+            }
+            else if button == .negative {
+                
+            }
+            else if button == .percent {
+                self.value = "\((Double(self.value) ?? 0) / 100.0)"
+                self.equation.append("%")
+            }
         default:
             if equalPressed == true {
                 self.value = "0"
@@ -180,6 +197,13 @@ struct ContentView: View {
     
     func buttonHeight() -> CGFloat {
         return (UIScreen.main.bounds.width - (5 * 12)) / 4
+    }
+    
+    func removeDecimal(number: Double) -> String {
+        if number.truncatingRemainder(dividingBy: 1.0) == 0.0 {
+            return "\(Int(number))"
+        }
+        return "\(number)"
     }
 }
 
