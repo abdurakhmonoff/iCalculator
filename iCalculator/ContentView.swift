@@ -165,7 +165,15 @@ struct ContentView: View {
                 
             }
             else if button == .negative {
-                
+                let number = Double(self.value) ?? 0.0
+                if number > 0.0 {
+                    self.value = "-\(self.removeDecimal(number: Double(self.value) ?? 0.0))"
+                    self.equation.insert("-", at: self.equation.index(self.value.startIndex, offsetBy: self.equation.count - self.value.count + 1))
+                }
+                else if number < 0.0 {
+                    self.value = "\(self.removeDecimal(number: fabs(Double(self.value) ?? 0.0)))"
+                    self.equation.remove(at: self.equation.index(self.value.startIndex, offsetBy: self.equation.count - self.value.count - 1))
+                }
             }
             else if button == .percent {
                 self.value = "\((Double(self.value) ?? 0) / 100.0)"
