@@ -47,8 +47,10 @@ enum Operation {
 struct ContentView: View {
     
     @State var value = "0"
+    @State var equation = ""
     @State var runningNumber = 0
     @State var currentOperation: Operation = .none
+    @State var equalPressed = false
     
     let buttons: [[CalcButton]] = [
         [.clear, .negative, .percent, .divide],
@@ -66,12 +68,19 @@ struct ContentView: View {
                 Spacer()
                 
                 // Text display
-                HStack {
-                    Spacer()
-                    Text(value)
-                        .bold()
-                        .font(.system(size: 80))
-                        .foregroundColor(.white)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text(equation)
+                            .font(.system(size: 32))
+                            .foregroundColor(.gray)
+                    }
+                    HStack {
+                        Spacer()
+                        Text(value)
+                            .font(.system(size: 100))
+                            .foregroundColor(.white)
+                    }
                 }
                 .padding()
                 
@@ -83,6 +92,7 @@ struct ContentView: View {
                                 self.didTap(button: item)
                             }, label: {
                                 Text(item.rawValue)
+                                    .bold()
                                     .font(.system(size: 32))
                                     .frame(width: self.buttonWidth(item: item), height: self.buttonHeight())
                                     .background(item.buttonColor)
@@ -103,20 +113,25 @@ struct ContentView: View {
             if button == .add {
                 self.currentOperation = .add
                 self.runningNumber = Int(self.value) ?? 0
+                self.equation.append(" + ")
             }
             else if button == .subtract {
                 self.currentOperation = .subtract
                 self.runningNumber = Int(self.value) ?? 0
+                self.equation.append(" - ")
             }
             else if button == .multiply {
                 self.currentOperation = .multiply
                 self.runningNumber = Int(self.value) ?? 0
+                self.equation.append(" × ")
             }
             else if button == .divide {
                 self.currentOperation = .divide
                 self.runningNumber = Int(self.value) ?? 0
+                self.equation.append(" ÷ ")
             }
             else if button == .equal {
+                equalPressed = true
                 let runningValue = self.runningNumber
                 let currentValue = Int(self.value) ?? 0
                 switch self.currentOperation {
@@ -127,6 +142,7 @@ struct ContentView: View {
                 case .none:
                     break
                 }
+                self.equation.append(" = ")
             }
             
             if button != .equal {
@@ -134,16 +150,24 @@ struct ContentView: View {
             }
         case .clear:
             self.value = "0"
+            self.currentOperation = .none
+            self.equation = ""
         case .decimal, .negative, .percent:
             break
         default:
+            if equalPressed == true {
+                self.value = "0"
+                self.equation = ""
+                equalPressed = false
+            }
             let number = button.rawValue
             if self.value == "0" {
-                value = number
+                self.value = number
             }
             else {
                 self.value = "\(self.value)\(number)"
             }
+            self.equation.append("\(number)")
         }
     }
     
