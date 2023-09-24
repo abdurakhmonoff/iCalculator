@@ -31,9 +31,9 @@ enum CalcButton: String {
     var buttonColor: Color {
         switch self {
         case .add, .subtract, .multiply, .divide, .equal:
-            return Color(UIColor(red: 230/255.0, green: 126/255.0, blue: 34/255.0, alpha: 1))
+            return Color(UIColor(red: 255/255.0, green: 121/255.0, blue: 63/255.0, alpha: 1))
         case .clear, .negative, .percent:
-            return Color(.darkGray)
+            return Color(UIColor(red: 64/255.0, green: 115/255.0, blue: 158/255.0, alpha: 1))
         default:
             return Color(UIColor(red: 44/255.0, green: 62/255.0, blue: 80/255.0, alpha: 1))
         }
@@ -50,7 +50,9 @@ struct ContentView: View {
     @State var equation = ""
     @State var runningNumber: Double = 0.0
     @State var currentOperation: Operation = .none
+    
     @State var equalPressed = false
+    @State var decimalPressed = false
     
     let buttons: [[CalcButton]] = [
         [.clear, .negative, .percent, .divide],
@@ -80,6 +82,8 @@ struct ContentView: View {
                         Text(value)
                             .font(.system(size: 100))
                             .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
                     }
                 }
                 .padding()
@@ -110,6 +114,9 @@ struct ContentView: View {
     func didTap(button: CalcButton) {
         switch button {
         case .add, .subtract, .multiply, .divide, .equal:
+            if decimalPressed == true {
+                break
+            }
             if button == .add {
                 self.currentOperation = .add
                 self.runningNumber = Double(self.value) ?? 0.0
@@ -161,25 +168,32 @@ struct ContentView: View {
             self.currentOperation = .none
             self.equation = ""
         case .decimal, .negative, .percent:
+            let number = Double(self.value) ?? 0.0
             if button == .decimal {
-                
+                if !self.value.contains(".") {
+                    self.value.append(".")
+                    self.equation.append(".")
+                    self.decimalPressed = true
+                }
             }
-            else if button == .negative {
-                let number = Double(self.value) ?? 0.0
+            else if button == .negative && decimalPressed != true {
                 if number > 0.0 {
-                    self.value = "-\(self.removeDecimal(number: Double(self.value) ?? 0.0))"
+                    self.value = "-\(self.removeDecimal(number: number))"
                     self.equation.insert("-", at: self.equation.index(self.value.startIndex, offsetBy: self.equation.count - self.value.count + 1))
                 }
                 else if number < 0.0 {
-                    self.value = "\(self.removeDecimal(number: fabs(Double(self.value) ?? 0.0)))"
+                    self.value = "\(self.removeDecimal(number: fabs(number)))"
                     self.equation.remove(at: self.equation.index(self.value.startIndex, offsetBy: self.equation.count - self.value.count - 1))
                 }
             }
-            else if button == .percent {
-                self.value = "\((Double(self.value) ?? 0) / 100.0)"
+            else if button == .percent && decimalPressed != true {
+                self.value = "\((number) / 100.0)"
                 self.equation.append("%")
             }
         default:
+            if self.value.count > 10 {
+                break
+            }
             if equalPressed == true {
                 self.value = "0"
                 self.equation = ""
@@ -191,6 +205,7 @@ struct ContentView: View {
             }
             else {
                 self.value = "\(self.value)\(number)"
+                self.decimalPressed = false
             }
             self.equation.append("\(number)")
         }
